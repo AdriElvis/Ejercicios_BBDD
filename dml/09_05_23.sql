@@ -12,63 +12,17 @@ select * from public.products where category_id in (select category_id from publ
 -- Subconsultas correlacionadas 
 
 --Obtener el número de empleado y el apellido para aquellos empleados que tengan menos de 100 ordenes.
-
-SELECT employee_id, last_name
-FROM employees
-WHERE (
-  SELECT COUNT(*)
-  FROM orders
-  WHERE employee_id = employees.employee_id
-) < 100;
+SELECT employee_id, last_name FROM employees as e WHERE (SELECT COUNT(o.order_id) FROM orders as o WHERE o.employee_id = e.employee_id)<100;
 --Obtener la clave de cliente y el nombre de la empresa para aquellos clientes que tengan más de 20 ordenes
-SELECT customer_id, company_name
-FROM customers c
-WHERE (
-  SELECT COUNT(*) 
-  FROM orders o 
-  WHERE o.customer_id = c.customer_id
-) > 20;
+SELECT	customer_id, company_name FROM CUSTOMERS C WHERE (SELECT COUNT(*) from orders where customer_id = c.customer_id)>20;
 --Obtener el productoid, el nombre del producto, el proveedor de la tabla de productos para aquellos productos que se hayan vendido menos de 100 unidades (Consultarlo en la tabla de Orders details).
-SELECT product_id, product_name, supplier_id
-FROM products p
-WHERE EXISTS (
-  SELECT 1
-  FROM order_details od
-  WHERE od.product_id = p.product_id
-  GROUP BY od.product_id
-  HAVING SUM(quantity) < 100
-);
-
+SELECT product_id, product_name, supplier_id FROM products AS p WHERE (SELECT SUM(od.quantity) FROM order_details AS od WHERE p.product_id = od.product_id) < 100;
 --Obtener los datos del empleado IDEmpleado y nombre completo De aquellos que tengan mas de 100 ordenes
-SELECT employee_id, CONCAT(first_name, ' ', last_name) AS nombre_completo
-FROM employees
-WHERE employee_id IN (
-  SELECT employee_id
-  FROM orders
-  WHERE orders.employee_id = employees.employee_id
-  GROUP BY employee_id
-  HAVING COUNT(*) > 100
-);
+SELECT employee_id, CONCAT(first_name, ' ', last_name) AS nombre_completo from employees where( select count(employee_id) from orders where orders.employee_id = employees.employee_id )>100;
 --Obtener los datos de Producto ProductId, ProductName, UnitsinStock, UnitPrice (Tabla Products) de los productos que la sumatoria de la cantidad (Quantity) de orders details sea mayor a 450
-SELECT product_id, product_name, units_in_stock, unit_price
-FROM products
-WHERE product_id IN (
-  SELECT product_id
-  FROM order_details
-  WHERE order_details.product_id = products.product_id
-  GROUP BY product_id
-  HAVING SUM(quantity) > 450
-);
+SELECT product_id, product_name, units_in_stock, unit_price FROM products AS p WHERE (SELECT SUM(od.quantity) FROM order_details AS od WHERE p.product_id = od.product_id) > 450;
 --Obtener la clave de cliente y el nombre de la empresa para aquellos clientes que tengan más de 20 ordenes.
-SELECT customer_id, company_name
-FROM customers
-WHERE customer_id IN (
-  SELECT customer_id
-  FROM orders
-  WHERE customers.customer_id = orders.customer_id
-  GROUP BY customer_id
-  HAVING COUNT(*) > 20
-);
+SELECT customer_id, company_name FROM customers AS c WHERE (SELECT COUNT(o.order_id) FROM orders AS o WHERE c.customer_id = o.customer_id) > 20;
 
 --insert
 
