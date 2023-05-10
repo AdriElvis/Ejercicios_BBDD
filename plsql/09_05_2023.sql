@@ -68,13 +68,19 @@ END $$ LANGUAGE plpgsql;
     su duracion en meses y la tasa de interes, retornando el monto de la cuota a pagar.
     Aplicar el metodo de amortizacion frances.
 */
-DO $$
-	DECLARE
-		monto_prestamo numeric := 10000;
-		meses integer := 24;
-		tasa_interes numeric := 5;
-		cuota_mensual numeric;
-	BEGIN
-	cuota_mensual := monto_prestamo/(1-(1/(1+tasa_interes))^meses)/tasa_interes;
-    RAISE NOTICE 'La cuota mensual a pagar es: %', cuota_mensual;
-END $$ LANGUAGE plpgsql;
+do 
+$$
+declare monto_prestamo numeric:=100.00;
+duracion_meses int:=36;
+tasa_interes numeric:=0.07 ;
+tasa_mensual numeric;
+factor numeric; 
+cuota numeric;
+begin
+  tasa_mensual := tasa_interes / 12;
+  factor := (tasa_mensual * pow(1 + tasa_mensual, duracion_meses)) / (pow(1 + tasa_mensual, duracion_meses) - 1);
+  cuota := monto_prestamo * factor;
+  raise notice 'La cuota es %', cuota;
+ 
+end
+$$ language 'plpgsql'
